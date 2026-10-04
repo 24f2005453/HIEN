@@ -1,0 +1,6 @@
+{
+  "name": "HIEN — Hyperlocal Inventory Exchange Network",
+  "description": "Hyperlocal reverse-logistics platform verifying returned e-commerce products at partner Access Points with optical edge AI and reselling them locally as verified open-box inventory.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

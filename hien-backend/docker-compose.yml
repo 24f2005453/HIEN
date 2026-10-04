@@ -1,0 +1,58 @@
+# =============================================================
+# HIEN Backend — Docker Compose
+# =============================================================
+# Runs PostgreSQL + PostGIS and the FastAPI backend together.
+#
+# Usage:
+#   docker compose up --build
+#   docker compose down
+#   docker compose down -v   (removes database volume)
+# =============================================================
+
+services:
+  # ---------------------------------------------------------
+  # PostgreSQL + PostGIS
+  # ---------------------------------------------------------
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: hien-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hien}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistent data volume
+      - hien_pgdata:/var/lib/postgresql/data
+      # Auto-run init_db.sql on first container creation
+      - ./init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-hien}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ---------------------------------------------------------
+  # FastAPI Backend
+  # ---------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hien-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-hien}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  hien_pgdata:
+    driver: local
