@@ -1,5 +1,5 @@
 # =============================================================
-# HIEN Root — .gitignore
+# HIEN Backend — .gitignore
 # =============================================================
 
 # Byte-compiled / optimized files
@@ -41,5 +41,5 @@ build/
 *.egg-info/
 *.log
 
-# Nested repo / builds
-HIEN/
+# Local database mount (if any)
+pgdata/
